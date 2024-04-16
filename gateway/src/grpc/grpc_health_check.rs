@@ -21,29 +21,29 @@ pub struct GrpcHealthCheck {
 
 impl GrpcHealthCheck {}
 
-#[async_trait]
-impl HealthCheck for GrpcHealthCheck {
-    async fn check(&self, target: &Backend) -> pingora_error::Result<()> {
-        let health_client = self.client_cache
-            .borrow_mut()
-            .get_or_insert_mut(target.clone(), async || {
-                let conn = tonic::transport::Endpoint::from_static("").connect().await;
-
-                return HealthClient::new(conn.unwrap());
-            });
-
-        let x = health_client.check(Request::new(HealthCheckRequest {
-            service: "".to_string()
-        })).await;
-
-        Ok(())
-    }
-
-    fn health_threshold(&self, success: bool) -> usize {
-        if success {
-            self.consecutive_success
-        } else {
-            self.consecutive_failure
-        }
-    }
-}
+// #[async_trait]
+// impl HealthCheck for GrpcHealthCheck {
+//     async fn check(&self, target: &Backend) -> pingora_error::Result<()> {
+//         // let health_client = self.client_cache
+//         //     .borrow_mut()
+//         //     .get_or_insert_mut(target.clone(), async || {
+//         //         let conn = tonic::transport::Endpoint::from_static("").connect().await;
+//         //
+//         //         return HealthClient::new(conn.unwrap());
+//         //     });
+//         //
+//         // let x = health_client.check(Request::new(HealthCheckRequest {
+//         //     service: "".to_string()
+//         // })).await;
+//
+//         Ok(())
+//     }
+//
+//     fn health_threshold(&self, success: bool) -> usize {
+//         if success {
+//             self.consecutive_success
+//         } else {
+//             self.consecutive_failure
+//         }
+//     }
+// }

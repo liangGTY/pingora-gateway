@@ -4,6 +4,7 @@ use pingora_core::services::listening::Service;
 use pingora_proxy::HttpProxy;
 use prometheus::register_int_counter;
 use structopt::StructOpt;
+use crate::backends::backends_manager::BackendsManager;
 use crate::server_app::ServerApp;
 
 pub struct ServerStartup {
@@ -27,7 +28,9 @@ impl ServerStartup {
 fn get_proxy_service(server: &Server) -> Service<HttpProxy<ServerApp>> {
     let mut proxy = pingora_proxy::http_proxy_service(
         &server.configuration,
-        ServerApp {},
+        ServerApp {
+            backends_manager: BackendsManager::new()
+        },
     );
     let cert_path = format!("{}/tests/keys/server.pem", env!("CARGO_MANIFEST_DIR"));
     let key_path = format!("{}/tests/keys/server.key", env!("CARGO_MANIFEST_DIR"));

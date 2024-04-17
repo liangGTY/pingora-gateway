@@ -1,10 +1,14 @@
+use std::net::ToSocketAddrs;
 use async_trait::async_trait;
 use log::info;
 use pingora_core::prelude::HttpPeer;
 use pingora_http::{RequestHeader, ResponseHeader};
 use pingora_proxy::{ProxyHttp, Session};
+use crate::backends::backends_manager::BackendsManager;
 
-pub struct ServerApp {}
+pub struct ServerApp {
+    pub backends_manager: BackendsManager
+}
 
 #[async_trait]
 impl ProxyHttp for ServerApp {
@@ -16,9 +20,8 @@ impl ProxyHttp for ServerApp {
         session: &mut Session,
         _ctx: &mut Self::CTX,
     ) -> pingora_error::Result<Box<HttpPeer>> {
-        // todo!("load-blance");
-        let addr = ("localhost", 50051);
-        let mut peer = Box::new(HttpPeer::new(addr, false, "one.one.one.one".to_string()));
+        let backend = self.backends_manager.get_or_create_backends("".into()).select("".into(), 0).unwrap();
+        let mut peer = Box::new(HttpPeer::new(backend, false, "one.one.one.one".to_string()));
         peer.options.set_http_version(2, 2);
         Ok(peer)
     }

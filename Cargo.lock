@@ -665,6 +665,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "gateway"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "env_logger",
+ "log",
+ "lru",
+ "pingora",
+ "pingora-core",
+ "pingora-error",
+ "pingora-http",
+ "pingora-load-balancing",
+ "pingora-proxy",
+ "prometheus",
+ "structopt",
+ "tokio",
+ "tonic",
+ "tonic-health",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1971,27 +1992,6 @@ dependencies = [
  "ryu",
  "serde",
  "yaml-rust",
-]
-
-[[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "env_logger",
- "log",
- "lru",
- "pingora",
- "pingora-core",
- "pingora-error",
- "pingora-http",
- "pingora-load-balancing",
- "pingora-proxy",
- "prometheus",
- "structopt",
- "tokio",
- "tonic",
- "tonic-health",
 ]
 
 [[package]]

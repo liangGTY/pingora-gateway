@@ -1,10 +1,9 @@
-use std::num::NonZeroUsize;
+use std::cell::{Cell, RefCell};
+use std::sync::Arc;
+use async_trait::async_trait;
 use lru::LruCache;
-use pingora_core::protocols::raw_connect::connect;
 use pingora_load_balancing::Backend;
 use pingora_load_balancing::health_check::HealthCheck;
-use tonic::client::GrpcService;
-use tonic::codegen::InterceptedService;
 use tonic::Request;
 use tonic::transport::Channel;
 use tonic_health::pb::health_client::HealthClient;
@@ -17,20 +16,23 @@ pub struct GrpcHealthCheck {
     /// Number of failed check to flip from healthy to unhealthy.
     pub consecutive_failure: usize,
 
-    client_cache: LruCache<Backend, HealthClient<Channel>>,
+    client_cache: RefCell<LruCache<Backend, HealthClient<Channel>>>,
 }
 
 impl GrpcHealthCheck {}
 
+#[async_trait]
 impl HealthCheck for GrpcHealthCheck {
-    async fn check(&self, target: &Backend) -> pingora::Result<()> {
+    async fn check(&self, target: &Backend) -> pingora_error::Result<()> {
+        let health_client = self.client_cache
+            .borrow_mut()
+            .get_or_insert_mut(target.clone(), async || {
+                let conn = tonic::transport::Endpoint::from_static("").connect().await;
 
-        let conn = tonic::transport::Endpoint::from_static(target.to_string().into()).connect().await?;
-        let mut client = HealthClient::new(conn);
+                return HealthClient::new(conn.unwrap());
+            });
 
-
-
-        let x = client.check(Request::new(HealthCheckRequest {
+        let x = health_client.check(Request::new(HealthCheckRequest {
             service: "".to_string()
         })).await;
 

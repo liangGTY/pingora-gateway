@@ -13,17 +13,12 @@ use tonic::Request;
 use tonic_health::pb::health_client::HealthClient;
 use tonic_health::pb::HealthCheckRequest;
 
-fn check_login(req: &pingora_http::RequestHeader) -> bool {
-    // implement you logic check logic here
-    req.headers.get("Authorization").map(|v| v.as_bytes()) == Some(b"password")
-}
-
-pub struct MyGateway {
+pub struct Gateway {
     req_metric: prometheus::IntCounter,
 }
 
 #[async_trait]
-impl ProxyHttp for MyGateway {
+impl ProxyHttp for Gateway {
     type CTX = ();
     fn new_ctx(&self) -> Self::CTX {}
 
@@ -32,16 +27,10 @@ impl ProxyHttp for MyGateway {
         session: &mut Session,
         _ctx: &mut Self::CTX,
     ) -> Result<Box<HttpPeer>> {
-
+        todo!("load-blance");
         let addr = ("localhost", 50051);
-
-        info!("connecting to {addr:?}");
-
         let mut peer = Box::new(HttpPeer::new(addr, false, "one.one.one.one".to_string()));
-
-
-        peer.options.set_http_version(2,2);
-
+        peer.options.set_http_version(2, 2);
         Ok(peer)
     }
 
@@ -98,7 +87,7 @@ fn main() {
 
     let mut my_proxy = pingora_proxy::http_proxy_service(
         &my_server.configuration,
-        MyGateway {
+        Gateway {
             req_metric: register_int_counter!("reg_counter", "Number of requests").unwrap(),
         },
     );

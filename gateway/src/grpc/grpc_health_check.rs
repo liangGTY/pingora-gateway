@@ -1,13 +1,8 @@
-use std::cell::{Cell, RefCell};
-use std::sync::Arc;
-use async_trait::async_trait;
 use lru::LruCache;
 use pingora_load_balancing::Backend;
-use pingora_load_balancing::health_check::HealthCheck;
-use tonic::Request;
+use std::cell::RefCell;
 use tonic::transport::Channel;
 use tonic_health::pb::health_client::HealthClient;
-use tonic_health::pb::HealthCheckRequest;
 
 
 pub struct GrpcHealthCheck {

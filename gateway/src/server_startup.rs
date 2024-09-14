@@ -15,6 +15,12 @@ impl ServerStartup {
     pub fn new() -> ServerStartup {
         let mut server = Server::new(Some(Opt::from_args())).unwrap();
 
+        server.bootstrap();
+
+        let service = get_proxy_service(&server);
+
+        server.add_service(service);
+
         Self {
             server
         }
@@ -38,7 +44,7 @@ fn get_proxy_service(server: &Server) -> Service<HttpProxy<ServerApp>> {
     let mut tls_settings = pingora_core::listeners::TlsSettings::intermediate(&cert_path, &key_path).unwrap();
     tls_settings.enable_h2();
 
-    proxy.add_tls_with_settings("0.0.0.0:6189", None, tls_settings);
+    proxy.add_tls_with_settings("0.0.0.0:443", None, tls_settings);
 
     proxy
 }
